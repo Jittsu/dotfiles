@@ -1,0 +1,53 @@
+# this file is loaded from .zshrc
+# add aliases in this file
+
+alias B='php ./build'
+alias CB='cd ./build_company'
+alias cw='compass watch --time'
+alias mkdir='mkdir -p'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias relogin='exec $SHELL -l'
+alias rm='rm -i'
+alias mv='mv -i'
+alias cp='cp -i'
+alias ll='ls -alGF'
+alias ls='ls -G'
+alias v='vim'
+alias e='emacs'
+alias sl='ls'
+alias ..='cd ../'
+alias kspython="/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python2"
+
+# colordiff
+if type "colordiff" > /dev/null 2>&1; then
+    alias diff='colordiff -u'
+else
+    alias diff='diff -u'
+fi
+
+# micro
+if type "micro" > /dev/null 2>&1; then
+    alias mi='micro'
+fi
+
+# ccat
+if type "ccat" > /dev/null 2>&1; then
+    alias cat='ccat'
+fi
+
+# z command to j
+alias j='z'
+
+# open current directory with Finder
+alias f='open .'
+
+# ggrks
+alias g='ggrks'
+
+# open all markdown files in current directory
+alias md='vim ./*.md'
+
+# phpunit
+alias test='./vendor/bin/phpunit'

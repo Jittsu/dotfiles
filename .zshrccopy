@@ -1,0 +1,283 @@
+# --------------------------------------------------
+#  カレントディレクトリ表示（左）
+# --------------------------------------------------
+
+case ${USERNAME} in
+    'root')
+	PROMPT='
+%F{red}%B%n@%m%b%f%F{white}:%f %F{110}%B%~%b%f
+ %F{red}%B#%b%f%F{white}%B>%b%f '
+	;;
+    *)
+	PROMPT='
+%F{cyan}%B%m%b%f%F{white}:%f %F{110}%B%~%b%f
+ %F{cyan}%B$%b%f%F{white}%B>%b%f '
+	;;
+esac
+
+# --------------------------------------------------
+#  git branch状態を表示（右）
+# --------------------------------------------------
+
+autoload -Uz vcs_info
+setopt prompt_subst
+
+# true | false
+# trueで作業ブランチの状態に応じて表示を変える
+zstyle ':vcs_info:*' check-for-changes false
+# addしてない場合の表示
+zstyle ':vcs_info:*' unstagedstr "%F{red}%B＋%b%f"
+# commitしてない場合の表示
+zstyle ':vcs_info:*' stagedstr "%F{yellow}★ %f"
+# デフォルトの状態の表示
+zstyle ':vcs_info:*' formats "%u%c%F{green}【 %b 】%f"
+# コンフリクトが起きたり特別な状態になるとformatsの代わりに表示
+zstyle ':vcs_info:*' actionformats '【%b | %a】'
+
+precmd () { vcs_info }
+
+RPROMPT=$RPROMPT'${vcs_info_msg_0_}'
+
+# --------------------------------------------------
+#  gitコマンド補完機能セット
+# --------------------------------------------------
+
+# autoloadの文より前に記述
+fpath=(~/.zsh/completion $fpath)
+
+# --------------------------------------------------
+#  コマンド入力補完
+# --------------------------------------------------
+
+# 補完機能有効にする
+autoload -U compinit
+compinit -u
+
+# 補完候補に色つける
+autoload -U colors
+colors
+zstyle ':completion:*' list-colors "${LS_COLORS}"
+
+# 単語の入力途中でもTab補完を有効化
+setopt complete_in_word
+# 補完候補をハイライト
+zstyle ':completion:*:default' menu select=1
+# キャッシュの利用による補完の高速化
+zstyle ':completion::complete:*' use-cache true
+# 大文字、小文字を区別せず補完する
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+# 補完リストの表示間隔を狭くする
+setopt list_packed
+
+# コマンドの打ち間違いを指摘してくれる
+setopt correct
+SPROMPT="correct: $RED%R$DEFAULT -> $GREEN%r$DEFAULT ? [Yes/No/Abort/Edit] => "
+
+# ディレクトリ名を補完すると、末尾がスラッシュになる
+setopt AUTO_PARAM_SLASH
+
+# 語の途中でもカーソル位置で補完
+setopt COMPLETE_IN_WORD
+
+# 補完候補のメニュー選択で、矢印キーの代わりにhjklで移動出来るようにする。
+zmodload zsh/complist
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
+
+# --------------------------------------------------
+#  $ cd 機能拡張
+# --------------------------------------------------
+
+# cdを使わずにディレクトリを移動できる
+setopt auto_cd
+# $ cd - でTabを押すと、ディレクトリの履歴が見れる
+setopt auto_pushd
+
+# --------------------------------------------------
+#  $ tree でディレクトリ構成表示
+# --------------------------------------------------
+
+alias tree="pwd;find . | sort | sed '1d;s/^\.//;s/\/\([^/]*\)$/|--\1/;s/\/[^/|]*/| /g'"
+
+# History
+HISTSIZE=50000
+HISTTIMEFORMAT='%Y/%m/%d %H:%M:%S '
+
+# Language
+export LANG=ja_JP.UTF-8
+
+# Show ssh username and hostname
+SSH_CONNECTION=1
+
+# Source Prezto.
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+	. "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+
+# Customize to your needs...
+if [ -f ~/.zsh_aliases ]; then
+	. ~/.zsh_aliases
+fi
+
+# Customize to your needs...
+if [ -f ~/.zsh_functions ]; then
+	. ~/.zsh_functions
+fi
+
+# less
+if type "source-highlight" > /dev/null 2>&1; then
+	export LESS='-R'
+	export LESSOPEN='| /usr/local/bin/src-hilight-lesspipe.sh %s'
+fi
+
+# nodebrew
+if type "nodebrew" > /dev/null 2>&1; then
+	export PATH=$HOME/.nodebrew/current/bin:$PATH
+fi
+
+# npm global path
+if [ -e $HOME/.npm/bin ]; then
+	export PATH=$HOME/.npm/bin:$PATH
+fi
+
+# composer
+if [ -e $HOME/.composer/vendor/bin ]; then
+	export PATH=$HOME/.composer/vendor/bin:$PATH
+fi
+
+# --------------------------------------------------
+#  git エイリアス
+# --------------------------------------------------
+
+alias g='git'
+compdef g=git
+
+alias gis='git status --short --branch'
+alias gal='git add -A'
+alias gc='git commit -m'
+alias gps='git push'
+alias gpsu='git push -u origin'
+alias gp='git pull origin'
+alias gpl='git pull'
+alias gf='git fetch'
+alias gfp='git fetch -p'
+
+# logを見やすく
+alias gl='git log --abbrev-commit --no-merges --date=short --date=iso'
+# grep
+alias glg='git log --abbrev-commit --no-merges --date=short --date=iso --grep'
+# ローカルコミットを表示
+alias glc='git log --abbrev-commit --no-merges --date=short --date=iso origin/html..html'
+
+alias gd='git diff'
+alias gco='git checkout'
+alias gcob='git checkout -b'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gbr='git branch -r'
+
+alias gm='git merge'
+alias gr='git reset'
+
+##
+# alias
+#
+# plz add aliases to file ~/.zsh_aliases
+# do not add here
+
+##
+# functions
+#
+# plz add functions to file ~/.zsh_functons
+# do not add here
+
+# コミット 3行用
+function git_commit() {
+	BUFFER='git commit -m "#'
+	CURSOR=$#BUFFER
+	BUFFER=$BUFFER'" -m "" -m ""'
+}
+zle -N git_commit
+bindkey '^[git_commit' git_commit
+
+# タブに名前を付ける
+function tab_rename() {
+	BUFFER="echo -ne \"\e]1;"
+	CURSOR=$#BUFFER
+	BUFFER=$BUFFER\\a\"
+}
+zle -N tab_rename
+bindkey '^[tab_rename' tab_rename
+
+# 単語単位で削除（前後）
+# 前：option ,
+# 後：option .
+bindkey '^[word-remove-right' kill-word
+bindkey '^[word-remove-left' backward-kill-word
+
+# Settings og pyenv
+export PYENV_ROOT="${HOME}/.pyenv"
+if [ -d "${PYENV_ROOT}" ]; then
+  export PATH=${PYENV_ROOT}/bin:$PATH
+  eval "$(pyenv init -)"
+fi
+
+# for anaconda
+# . /home/jitsuzaki/.pyenv/versions/anaconda3-5.3.0/etc/profile.d/conda.sh  # commented out by conda initialize
+
+# default python
+#pyenv shell anaconda3-5.3.0
+
+export PATH=/usr/share/swift/usr/bin:/home/jitsuzaki/.pyenv/shims:/home/jitsuzaki/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+# function
+function ggrks() {
+	xdg-open "https://www.google.co.jp/search?q=$*";
+}
+
+function deck() {
+	xdg-open "https://tweetdeck.twitter.com/";
+}
+
+function youtube() {
+	xdg-open "https://www.youtube.com/?gl=JP&hl=ja";
+}
+
+function mython() {
+	mypy $1 && python $@;
+}
+
+# キー配置
+if [ -n "$DISPLAY" ]; then
+#	xmodmap -e 'keycode 37 = Escape'     # ctrl_L -> Esc
+	xmodmap -e 'keycode 97 = underscore' # \ -> _
+	xmodmap -e 'keycode 100 = F12'       # 変換 -> F12
+	xmodmap -e 'keycode 101 = BackSpace' # カタカナひらがなローマ字 -> Backspace
+	xmodmap -e 'keycode 102 = F5'        # 無変換 -> F5
+fi
+
+export PATH=$PATH:/home/jitsuzaki/FDK/Tools/linux
+export PATH=~/julia-1.1.1/bin:/usr/share/swift/usr/bin:/home/jitsuzaki/.pyenv/shims:/home/jitsuzaki/.pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/jitsuzaki/FDK/Tools/linux
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+#__conda_setup="$('/home/jitsuzaki/.pyenv/versions/anaconda3-5.3.0/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+#if [ $? -eq 0 ]; then
+#    eval "$__conda_setup"
+#else
+#    if [ -f "/home/jitsuzaki/.pyenv/versions/anaconda3-5.3.0/etc/profile.d/conda.sh" ]; then
+#        . "/home/jitsuzaki/.pyenv/versions/anaconda3-5.3.0/etc/profile.d/conda.sh"
+#    else
+#        export PATH="/home/jitsuzaki/.pyenv/versions/anaconda3-5.3.0/bin:$PATH"
+#    fi
+#fi
+#unset __conda_setup
+# <<< conda initialize <<<
+. /home/jitsuzaki/.pyenv/versions/anaconda3-5.3.0/etc/profile.d/conda.sh
+
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=/home/jitsuzaki/goproject
+export PATH=$HOME/.nodebrew/current/bin:$PATH

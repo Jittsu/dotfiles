@@ -1,0 +1,41 @@
+# this file is loaded from .zshrc
+# add user functions in this file
+
+# cd to the path of the front Finder window
+cdf() {
+    target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder wi    ndow as text)'`
+    if [ "$target" != "" ]; then
+        cd "$target"; pwd
+    else
+        echo 'No Finder window found' >&2
+    fi
+}
+
+calc() {
+    [ $# -ge 1 ] && echo "scale=5; $1" | bc
+}
+
+# google search
+function ggrks() {
+    open "https://www.google.co.jp/search?q=$*";
+}
+
+function deck() {
+    open "https://tweetdeck.twitter.com/";
+}
+
+function youtube() {
+    open "https://www.youtube.com/?gl=JP&hl=ja";
+}
+
+function mython() {
+    mypy $1 && python $*;
+}
+
+function cd() {
+    builtin cd $1 && ls
+}
+
+function tenki() {
+    curl -H "Accept-Language: ${LANG%_*}" wttr.in/"${1:-Fukuoka}"
+}

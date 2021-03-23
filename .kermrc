@@ -1,0 +1,7 @@
+set line /dev/cu.usbmodem14102
+set serial 8N1
+set speed 9600
+set carrier-watch off
+set flow-control none
+set transmit prompt 0
+set transmit linefeed on
